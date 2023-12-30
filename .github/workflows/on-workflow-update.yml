@@ -1,6 +1,6 @@
 on:
   repository_dispatch:
-    types: [pdate-documentation]
+    types: [update-documentation]
 
 jobs:
   lint-check:
