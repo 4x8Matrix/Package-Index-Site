@@ -20,7 +20,6 @@ jobs:
       - name: Lune build website
         run: |
           lune moonwave-build
-          git status
 
       - name: Commit changes
         run: |

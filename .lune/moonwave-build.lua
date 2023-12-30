@@ -9,6 +9,8 @@ local result = process.spawn("moonwave", {
 	"package-index/Modules",
 })
 
+print(result)
+
 if not result.ok then
 	error(result.stderr)
 end
