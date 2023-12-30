@@ -9,6 +9,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Setup Aftman
+        uses: ok-nick/setup-aftman@v0.4.2
+
       - name: Git Submodule Update
         run: |
           git pull --recurse-submodules
