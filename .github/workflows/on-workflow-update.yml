@@ -3,13 +3,23 @@ on:
     types: [update-documentation]
 
 jobs:
-  lint-check:
+  update-documentation:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.client_payload.ref }}
 
-      - name: Setup Aftman
-        uses: ok-nick/setup-aftman@v0.4.2
+      - name: Git Submodule Update
+        run: |
+          git pull --recurse-submodules
+          git submodule update --remote --recursive
+
+      - name: Lune build website
+        run: lune moonwave-build
+
+      - name: Commit changes
+        run: |
+          git config --global user.name 'Git bot'
+          git config --global user.email 'bot@noreply.github.com'
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git commit -am "Auto-update documentation '${{ github.event.client_payload.sha }}'" && git push || echo "No changes to commit"
