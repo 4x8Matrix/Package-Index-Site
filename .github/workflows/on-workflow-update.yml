@@ -13,13 +13,10 @@ jobs:
         uses: ok-nick/setup-aftman@v0.4.2
 
       - name: Git Submodule Update
-        run: |
-          git pull --recurse-submodules
-          git submodule update --remote --recursive
+        run: git submodule update --init --remote --recursive --force
 
       - name: Lune build website
-        run: |
-          lune moonwave-build
+        run: lune moonwave-build
 
       - name: Commit changes
         run: |
