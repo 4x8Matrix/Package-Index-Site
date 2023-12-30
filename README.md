@@ -14,6 +14,6 @@ Next, the workflows inside of this repository will call `lune moonwave-build` an
 
 Lastly, the workflow will commit and push these changes to the Repository, from there - vercel will update the production endpoint.
 
-### Why.. just why!?
+## Why.. just why!?
 
 It's both a challenge and a chaotic mess, but I love that! If anyone has a better solution to what i'd a massive hack, open up and issue and i'd be happy to discuss it!
