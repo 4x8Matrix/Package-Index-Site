@@ -18,7 +18,9 @@ jobs:
           git submodule update --remote --recursive
 
       - name: Lune build website
-        run: lune moonwave-build
+        run: |
+          lune moonwave-build
+          git status
 
       - name: Commit changes
         run: |
