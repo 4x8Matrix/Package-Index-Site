@@ -1,1 +1,6 @@
-{"Camera%20Profiler":"Camera Profiler","Console":"Console","Emoticon%20Reporter":"Emoticon Reporter","State":"State"}
+{
+  "CameraProfiler": "Camera Profiler",
+  "Console": "Console",
+  "EmoticonReporter": "Emoticon Reporter",
+  "State": "State"
+}
