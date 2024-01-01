@@ -358,9 +358,41 @@ local function writeFilesToFileSystem(fileTree: compiledFileTree, path: string, 
 	end
 end
 
-local function main(moonwaveData: moonwaveDataExportArray)
-	---------------------------------
+local function updateIndexPage(fileTree: compiledFileTree)
+	if fs.isFile("pages/index.mdx") then
+		fs.removeFile("pages/index.mdx")
+	end
 
+	local indexMdxContent =
+		"# Welcome 👋\n\nThis documentation site was generated to help provide developers with documentation for the various packages I [*(AsynchronousMatrix)*](https://github.com/4x8Matrix) develop in my free time.\n\n## Packages\n\n"
+
+	indexMdxContent ..= `| package | dependency | description |`
+	indexMdxContent ..= `\n| :----- | :----: | ----: |`
+
+	for _, fileOrFolderNode in fileTree.nodeChildren do
+		if fileOrFolderNode.nodeType == "FOLDER" then
+			local initFileNode: compiledFileNode = fileOrFolderNode.nodeChildren["init.lua"]
+
+			if not initFileNode then
+				continue
+			end
+
+			local filePath = initFileNode.nodeFullName
+			local wallyFilePath = `package-index/Modules/{fileOrFolderNode.nodeName}/wally.toml`
+			local wallyDetails = serde.decode("toml", fs.readFile(wallyFilePath))
+
+			filePath = string.split(filePath, "/")
+			table.remove(filePath, #filePath)
+			filePath = table.concat(filePath, "/")
+
+			indexMdxContent ..= `\n| [{fileOrFolderNode.nodeName}](Packages/{filePath}) | \`\`\`{fileOrFolderNode.nodeName} = {wallyDetails.package.name}@{wallyDetails.package.version}\`\`\` | {wallyDetails.package.description} |`
+		end
+	end
+
+	fs.writeFile("pages/index.mdx", indexMdxContent)
+end
+
+local function main(moonwaveData: moonwaveDataExportArray)
 	if fs.isDir("pages/Packages") then
 		fs.removeDir("pages/Packages")
 	end
@@ -376,6 +408,8 @@ local function main(moonwaveData: moonwaveDataExportArray)
 
 	writeFoldersToFileSystem(virtualTree, "pages/Packages")
 	writeFilesToFileSystem(virtualTree, "pages/Packages", metaFilePaths)
+
+	updateIndexPage(virtualTree)
 
 	for filePath, jsonContent in metaFilePaths do
 		fs.writeFile(`{filePath}/_meta.json`, net.jsonEncode(jsonContent, true))
