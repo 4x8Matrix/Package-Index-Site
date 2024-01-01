@@ -72,6 +72,25 @@ type moonwaveDataExportArray = {
 	}
 }
 
+type compiledFileNode = {
+	nodeType: "FILE",
+	nodeName: string,
+	nodeClassName: string,
+	nodeFullName: string,
+	nodeMdx: string,
+}
+
+type compiledFolderNode = {
+	nodeType: "FOLDER",
+	nodeName: string,
+	nodeChildren: { compiledFileNode | compiledFolderNode },
+}
+
+type compiledFileTree = {
+	nodeChildren: { compiledFileNode | compiledFolderNode },
+	mdxCount: number,
+}
+
 local function getFunctionsOfFunctionType(inputArray, functionType)
 	local resultArray = {}
 
@@ -224,9 +243,15 @@ end
 ---------------------------------
 
 local function createVirtualMDXs(moonwaveData: moonwaveDataExportArray)
-	local virtualFileSystem = {}
+	local virtualFileSystem = {
+		nodeChildren = {},
+		mdxCount = 0,
+	}
 
 	for _, moonwaveDataObject in moonwaveData do
+		local classSourceFile = string.split(moonwaveDataObject.source.path, "package-index/Modules/")[2]
+		local classFileSystem = string.split(classSourceFile, "/")
+
 		local className = moonwaveDataObject.name
 		local classDescription = moonwaveDataObject.desc
 		local classProperties = moonwaveDataObject.properties
@@ -245,16 +270,92 @@ local function createVirtualMDXs(moonwaveData: moonwaveDataExportArray)
 		classMdxContent = writeClassMethodsToMdx(className, classMethods, classMdxContent)
 		classMdxContent = writeClassFunctionsToMdx(className, classFunctions, classMdxContent)
 
-		table.insert(virtualFileSystem, {
-			path = net.urlEncode(className),
-			content = classMdxContent,
-			name = className,
-		})
+		virtualFileSystem.mdxCount += 1
+
+		table.remove(classFileSystem, 2)
+
+		local headNode = virtualFileSystem
+
+		for index, fileIndex in classFileSystem do
+			if index == #classFileSystem then
+				headNode.nodeChildren[fileIndex] = {
+					nodeType = "FILE",
+					nodeName = fileIndex,
+					nodeClassName = className,
+					nodeFullName = table.concat(classFileSystem, "/"),
+					nodeMdx = classMdxContent,
+				}
+			else
+				if not headNode.nodeChildren[fileIndex] then
+					headNode.nodeChildren[fileIndex] = {
+						nodeType = "FOLDER",
+						nodeName = fileIndex,
+						nodeChildren = {},
+					}
+				end
+
+				headNode = headNode.nodeChildren[fileIndex]
+			end
+		end
 	end
 
-	print(`Built #{#virtualFileSystem} virtual MDXs`)
+	print(`Built #{virtualFileSystem.mdxCount} virtual MDXs`)
 
 	return virtualFileSystem
+end
+
+local function writeFoldersToFileSystem(fileTree: compiledFileTree, path: string)
+	for _, fileOrFolderNode in fileTree.nodeChildren do
+		if fileOrFolderNode.nodeType == "FOLDER" then
+			local folderNode: compiledFolderNode = fileOrFolderNode
+			local folderPath = `{path}/{fileOrFolderNode.nodeName}`
+
+			fs.writeDir(folderPath)
+
+			writeFoldersToFileSystem({
+				nodeChildren = folderNode.nodeChildren,
+				mdxCount = -1,
+			}, folderPath)
+		end
+	end
+end
+
+local function writeFilesToFileSystem(fileTree: compiledFileTree, path: string, metaFilePaths)
+	for _, fileOrFolderNode in fileTree.nodeChildren do
+		if fileOrFolderNode.nodeType == "FILE" then
+			local fileNode: compiledFileNode = fileOrFolderNode
+			local filePath = `{path}/{fileOrFolderNode.nodeName}`
+			local fileName = string.match(fileOrFolderNode.nodeName, "(%S+)%.")
+
+			filePath = string.split(filePath, "/")
+			table.remove(filePath, #filePath)
+			filePath = table.concat(filePath, "/")
+
+			if fileName == "init" then
+				filePath = string.split(filePath, "/")
+				local newFileName = table.remove(filePath, #filePath)
+				filePath = table.concat(filePath, "/")
+
+				fileName = newFileName
+			end
+
+			if not metaFilePaths[filePath] then
+				metaFilePaths[filePath] = {}
+			end
+
+			metaFilePaths[filePath][net.urlEncode(fileName)] = fileNode.nodeClassName
+
+			fs.writeFile(`{filePath}/{net.urlEncode(fileName)}.mdx`, fileNode.nodeMdx)
+		else
+			local folderNode: compiledFolderNode = fileOrFolderNode
+			local folderPath = `{path}/{fileOrFolderNode.nodeName}`
+
+			writeFilesToFileSystem({
+				nodeChildren = folderNode.nodeChildren,
+				mdxCount = -1,
+			}, folderPath, metaFilePaths)
+		end
+	end
 end
 
 local function main(moonwaveData: moonwaveDataExportArray)
@@ -269,17 +370,16 @@ local function main(moonwaveData: moonwaveDataExportArray)
 	---------------------------------
 
 	local virtualTree = createVirtualMDXs(moonwaveData)
-	local virtualTreeFileNames = {}
+	local metaFilePaths = {}
 
-	print(`Writing #{#virtualTree} virtual MDXs`)
+	print(`Writing #{virtualTree.mdxCount} virtual MDXs`)
 
-	for _, fileContents in virtualTree do
-		fs.writeFile(`pages/Packages/{fileContents.path}.mdx`, fileContents.content)
+	writeFoldersToFileSystem(virtualTree, "pages/Packages")
+	writeFilesToFileSystem(virtualTree, "pages/Packages", metaFilePaths)
 
-		virtualTreeFileNames[fileContents.path] = fileContents.name
+	for filePath, jsonContent in metaFilePaths do
+		fs.writeFile(`{filePath}/_meta.json`, net.jsonEncode(jsonContent, true))
 	end
-
-	fs.writeFile(`pages/Packages/_meta.json`, serde.encode("json", virtualTreeFileNames))
 
 	print(`Finished writing Virtual FS`)
 end
