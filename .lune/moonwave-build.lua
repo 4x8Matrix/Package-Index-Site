@@ -38,6 +38,8 @@ type moonwavePropertyData = {
 type moonwaveFunctionData = {
 	name: string,
 	desc: string,
+	since: string?,
+	unreleased: boolean?,
 	source: {
 		path: string,
 		line: number,
@@ -234,6 +236,19 @@ local function writeClassFunctionsToMdx(className, classFunctions, mdxContent)
 		mdxContent ..= `### {parseFunctionHeader(proto)}\n`
 		mdxContent ..= `> {className}.{proto.name}({getReadableParamList(proto)}) -> {getReadableReturnsList(proto)}\n\n`
 		mdxContent ..= `{proto.desc}\n\n`
+
+		if proto.since then
+			mdxContent ..= `<Callout emoji="⚠️"> \nOnly avaliable in version **{string.sub(
+				proto.since,
+				7,
+				#proto.since
+			)}** and above\n </Callout>\n\n`
+		end
+
+		if proto.unreleased then
+			mdxContent ..= `<Callout emoji="⚠️">\nThis feature is not yet been published to the Wally package manager.\n</Callout>\n\n`
+		end
+
 		mdxContent ..= `---\n`
 	end
 
@@ -385,7 +400,7 @@ local function updateIndexPage(fileTree: compiledFileTree)
 			table.remove(filePath, #filePath)
 			filePath = table.concat(filePath, "/")
 
-			indexMdxContent ..= `\n| [{fileOrFolderNode.nodeName}](Packages/{filePath}) | \`\`\`{fileOrFolderNode.nodeName} = {wallyDetails.package.name}@{wallyDetails.package.version}\`\`\` | {wallyDetails.package.description} |`
+			indexMdxContent ..= `\n| [{fileOrFolderNode.nodeName}](Packages/{filePath}) | \`\`\`{fileOrFolderNode.nodeName} = "{wallyDetails.package.name}@{wallyDetails.package.version}"\`\`\` | {wallyDetails.package.description} |`
 		end
 	end
 
@@ -418,11 +433,14 @@ local function main(moonwaveData: moonwaveDataExportArray)
 	print(`Finished writing Virtual FS`)
 end
 
-main(serde.decode(
-	"json",
-	process.spawn("moonwave", {
-		"extract",
-		"-b",
-		"package-index/Modules",
-	}).stdout
-))
+local moonwaveExtractResult = process.spawn("moonwave", {
+	"extract",
+	"-b",
+	"package-index/Modules",
+})
+
+if not moonwaveExtractResult.ok then
+	error(moonwaveExtractResult.stderr)
+else
+	main(serde.decode("json", moonwaveExtractResult.stdout))
+end
