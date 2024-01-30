@@ -1,0 +1,91 @@
+import { Callout } from 'nextra/components'
+
+# ClassIndex
+A package that enables developers to get context about specific Roblox classes, this package uses a late-ish dump of the Roblox API
+	to be able to query information such as the superclasses for a specific class, properties for specific classes and so fourth.
+
+This package uses the [lune](https://lune-org.github.io/docs) runtime to update the 'generated-api-dump'
+
+## Properties
+## Methods
+### FetchApiDump
+
+> ClassIndex:FetchApiDump() ->  RawApiDump 
+
+Returns the Roblox API dump the current package is using. The returned object is typed.
+
+```lua
+	local APIDump = ClassIndex.FetchApiDump()
+
+	print(APIDump.Classes["Workspace"].Members)
+```
+
+---
+### FetchAllClassNames
+
+> ClassIndex:FetchAllClassNames() ->  [\{ string }](https://create.roblox.com/docs/en-us/luau/strings) 
+
+Returns an array of all classes in the Roblox Engine
+
+```lua
+	local classNames = ClassIndex.FetchAllClassNames()
+
+	for _, className in classNames do
+		print(className)
+	end
+```
+
+---
+### FetchPropertiesOfClass
+
+> ClassIndex:FetchPropertiesOfClass( `class` [string](https://create.roblox.com/docs/en-us/luau/strings) ) ->  \{ [string]: \{ string } } 
+
+Returns a dictionary, containing all properties of the supplied class and all of the supplied class super classes.
+
+```lua
+	local properties = ClassIndex.FetchPropertiesOfClass("Workspace")
+
+	--[[
+		properties = {
+			["Instance"] = {
+				[1] = "Archivable",
+				[2] = "ClassName",
+				[3] = "Name",
+				[4] = "Parent",
+				[5] = "RobloxLocked",
+				[6] = "SourceAssetId"
+			},
+			["Model"] = {...},
+			["PVInstance"] = {},
+			["Workspace"] = {...},
+			["WorldRoot"] = {}
+		}
+	]]
+
+	local workspaceProperties = properties.Workspace
+	local instanceProperties = properties.Instance
+	local modelProperties = properties.Model
+```
+
+---
+### FetchClassSuperClasses
+
+> ClassIndex:FetchClassSuperClasses( `class` [string](https://create.roblox.com/docs/en-us/luau/strings) ) ->  [\{ string }](https://create.roblox.com/docs/en-us/luau/strings) 
+
+Returns an array of all superclasses of the passed in class
+
+```lua
+	local superclasses = ClassIndex.FetchPropertiesOfClass("Workspace")
+
+	--[[
+		superclasses = {
+			[1] = "WorldRoot",
+			[2] = "Model",
+			[3] = "PVInstance",
+			[4] = "Instance"
+		}
+	]]
+```
+
+---
+## Functions
