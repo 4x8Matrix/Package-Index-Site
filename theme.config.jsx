@@ -43,9 +43,14 @@ export default {
 	
 	head: (
 		<>
-		  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		  <meta property="og:title" content="Package Index" />
-		  <meta property="og:description" content="" />
+			<link rel="shortcut icon" href="/favicons/site.ico" />
+			<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+			<meta property="og:title" content="Package Repository" />
+			<meta property="og:type" content="website" />
+			<meta property="og:url" content="https://docs.asyncmatrix.dev/" />
+			<meta property="og:image" content="/favicons/waving-hand.png" />
+			<meta property="og:description" content="A documentation site for any/all luau packages that have been developed under the 4x8Matrix/ prefix." />
+			<meta name="theme-color" content="#ffffff" />
 		</>
 	  )
   }
