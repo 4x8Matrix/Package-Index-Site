@@ -379,8 +379,12 @@ local function updateIndexPage(fileTree: compiledFileTree)
 	end
 
 	local indexMdxContent =
-		"# Welcome 👋\n\nThis documentation site was generated to help provide developers with documentation for the various packages I [*(AsynchronousMatrix)*](https://github.com/4x8Matrix) develop in my free time.\n\n## Packages\n\n"
+		"# Welcome 👋\n\nThis documentation site was generated to help provide developers with documentation for the various packages I [*(AsynchronousMatrix)*](https://github.com/4x8Matrix) develop in my free time."
 
+	indexMdxContent ..= `\n\n## Installation\n\n`
+
+	indexMdxContent ..= `### Wally\n\n`
+	indexMdxContent ..= `All packages are managed through Wally, the Roblox package manager.\n\n`
 	indexMdxContent ..= `| package | dependency | description |`
 	indexMdxContent ..= `\n| :----- | :----: | ----: |`
 
@@ -403,6 +407,11 @@ local function updateIndexPage(fileTree: compiledFileTree)
 			indexMdxContent ..= `\n| [{fileOrFolderNode.nodeName}](Packages/{filePath}) | \`\`\`{fileOrFolderNode.nodeName} = "{wallyDetails.package.name}@{wallyDetails.package.version}"\`\`\` | {wallyDetails.package.description} |`
 		end
 	end
+
+	indexMdxContent ..= `\n\n### Binaries\n\n`
+	indexMdxContent ..= `If wally isn't a viable option in your codebase, you can alternativly download any of the above packages through the 'Binaries' folder on the GitHub repository;`
+	indexMdxContent ..= `\n\nhttps://github.com/4x8Matrix/Package-Index/tree/Master/Binaries`
+	indexMdxContent ..= `\n\nThese binaries are exported as *rbxm* files, so you'll need to import them into studio through the 'Insert from File' context action, or by dragging and dropping them into the place!`
 
 	fs.writeFile("pages/index.mdx", indexMdxContent)
 end

@@ -1,3 +1,5 @@
+name: Build Documentation
+
 on:
   repository_dispatch:
     types: [update-documentation]
