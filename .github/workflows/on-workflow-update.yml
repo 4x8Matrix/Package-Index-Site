@@ -2,6 +2,9 @@ on:
   repository_dispatch:
     types: [update-documentation]
 
+permissions:
+  contents: write
+
 jobs:
   update-documentation:
     runs-on: ubuntu-latest
