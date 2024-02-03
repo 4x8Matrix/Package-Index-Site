@@ -85,6 +85,28 @@ Returns the 'Members' of a class, class members could be one of many things, ran
 ```
 
 ---
+### FetchClassIcon
+
+> ClassIndex.FetchClassIcon( `className` [string](https://create.roblox.com/docs/en-us/luau/strings) ) ->  \{ Image: string, ImageRectOffset: Vector2, ImageRectSize: Vector2 } 
+
+Re-implements the :GetClassIcon call seen under 'StudioService', allowing developers outside of the Plugin space to get class
+icons.
+
+> https://create.roblox.com/docs/reference/engine/classes/StudioService#GetClassIcon
+
+*Curse you Roblox! Why is this locked to just plugins?!*
+
+```lua
+	local label = Instance.new("ImageLabel")
+	
+	for property, value in ClassIndex.FetchClassIcon("Workspace") do
+		label[property] = value
+	end
+
+	...
+```
+
+---
 ### FetchClassMemberType
 
 > ClassIndex.FetchClassMemberType( `className` [string](https://create.roblox.com/docs/en-us/luau/strings), `memberName` [string](https://create.roblox.com/docs/en-us/luau/strings) ) ->  [string](https://create.roblox.com/docs/en-us/luau/strings) 
@@ -100,14 +122,16 @@ Returns the 'MemberType' of a class member.
 ---
 ### FetchClassMemberTags
 
-> ClassIndex.FetchClassMemberTags( `className` [string](https://create.roblox.com/docs/en-us/luau/strings), `memberName` [string](https://create.roblox.com/docs/en-us/luau/strings) ) ->  [string](https://create.roblox.com/docs/en-us/luau/strings) 
+> ClassIndex.FetchClassMemberTags( `className` [string](https://create.roblox.com/docs/en-us/luau/strings), `memberName` [string](https://create.roblox.com/docs/en-us/luau/strings) ) ->  \{ Hidden: boolean?, NotReplicated: boolean?, ReadOnly: boolean?, Deprecated: boolean? } 
 
 Returns the tags that have been applied to a class member.
 
 ```lua
-	local gravityMemberType = ClassIndex.FetchClassMemberTags("Workspace", "Gravity")
+	local gravityMemberTags = ClassIndex.FetchClassMemberTags("Workspace", "Gravity")
 
-	print(gravityMemberType) -- "Property"
+	if gravityMemberTags.Deprecated then
+		print("Oh noo! Where did Gravity go?!")
+	end
 ```
 
 ---
