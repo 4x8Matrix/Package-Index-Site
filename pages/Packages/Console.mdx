@@ -142,6 +142,28 @@ LogLevels that are by default set in `Console`:
 ```
 
 ---
+### SetTracebackEnabled
+
+> Console:SetTracebackEnabled( `traceback` [boolean](https://create.roblox.com/docs/en-us/luau/booleans) ) -> [nil](https://create.roblox.com/docs/en-us/luau/nil)
+
+Enable/Disable traceback logging for the 'Console' object
+
+```lua
+	local reporter = Console.new("🔥 CoolReporter")
+
+	reporter:SetTracebackEnabled(true)
+	reporter:Log("Hello, World") --[[
+		["🔥 CoolReporter"]["log"]: "Hello, World"
+		["🔥 CoolReporter"]["traceback"]: begin
+		Script 'ServerScriptService.Place.Services.GameLoopService', Line 30 - function OnGameStateBlocking
+		Script 'ServerScriptService.Place.Services.GameLoopService', Line 48
+		Script 'ReplicatedStorage.Packages._Index.sleitnick_signal@1.5.0.signal', Line 56 - function acquireRunnerThreadAndCallEventHandler
+		Script 'ReplicatedStorage.Packages._Index.sleitnick_signal@1.5.0.signal', Line 67 - function runEventHandlerInFreeThread
+		["🔥 CoolReporter"]["traceback"]: end
+	]]
+```
+
+---
 ### SetState
 
 > Console:SetState( `state:` [boolean](https://create.roblox.com/docs/en-us/luau/booleans) ) -> [nil](https://create.roblox.com/docs/en-us/luau/nil)
