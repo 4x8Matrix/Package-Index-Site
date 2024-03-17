@@ -27,7 +27,7 @@ I do want to credit the following people for both a resource and reference for t
 ## Methods
 ### ToString
 
-> PNGObject:ToString() -> [nil](https://create.roblox.com/docs/en-us/luau/nil)
+> PNGObject:ToString() ->  [string](https://create.roblox.com/docs/en-us/luau/strings) 
 
 Returns the binary blob for the PNG file, this is essentially the content you'd find under a `object.png` file.
 
@@ -35,7 +35,7 @@ Returns the binary blob for the PNG file, this is essentially the content you'd 
 ## Functions
 ### new
 
-> PNGObject.new( `size` [Vector2](https://create.roblox.com/docs/en-us/reference/engine/datatypes/Vector2), `rgba` \{ [number]: number } ) -> [nil](https://create.roblox.com/docs/en-us/luau/nil)
+> PNGObject.new( `size` [Vector2](https://create.roblox.com/docs/en-us/reference/engine/datatypes/Vector2), `rgba` \{ [number]: number } ) ->  PNGObject 
 
 Constructor function that creates a new PNG file, when this function is called, the binary data for the RGBA array will
 	be generated alongside this call.
